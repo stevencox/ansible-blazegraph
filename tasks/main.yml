@@ -1,0 +1,53 @@
+---
+# Install Blazegraph
+
+- name: Download Blazegraph
+  get_url: >-
+    url=http://sourceforge.net/projects/bigdata/files/bigdata/{{ blazegraph_version }}/blazegraph.jar/download
+    dest={{ tmp_root }}/blazegraph-{{ blazegraph_version }}.jar
+
+- name: Set permissions
+  file:
+    path: "{{ tmp_root }}/blazegraph-{{ blazegraph_version }}.jar"
+    mode: 0755
+    owner: "{{ blazegraph_service_username }}"
+    group: "{{ blazegraph_service_group }}"
+
+- name: "Create the blazegraph directory"
+  file:
+    path: "{{ blazegraph_working_directory }}/{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ blazegraph_service_username }}"
+    group: "{{ blazegraph_service_group }}"
+  with_items:
+    - 'bin'
+    - 'conf'
+
+- name: Move blazegraph to the install directory
+  command: "cp {{ tmp_root }}/blazegraph-{{ blazegraph_version }}.jar {{ blazegraph_working_directory }}"
+
+- name: Set permissions
+  file:
+    path: "{{ blazegraph_working_directory }}"
+    recurse: yes
+    mode: 0755
+    owner: "{{ blazegraph_service_username }}"
+    group: "{{ blazegraph_service_group }}"
+
+- name: Create blazegraph environment file
+  template: src=blazegraph-env.sh.j2 dest={{ blazegraph_working_directory }}/conf/blazegraph-env.sh
+
+- name: Create blazegraph cors config file
+  template: src=readonly_cors.xml.j2 dest={{ blazegraph_working_directory }}/conf/readonly_cors.xml
+
+- name: Create properties config file
+  template: src=blazegraph.properties.j2 dest={{ blazegraph_working_directory }}/conf/blazegraph.properties
+
+- name: Create blazegraph service script
+  template:
+    src: "blazegraph.sh.j2"
+    dest: "{{ blazegraph_working_directory }}/bin/blazegraph.sh"
+    mode: 0755
+    owner: "{{ blazegraph_service_username }}"
+    group: "{{ blazegraph_service_group }}"

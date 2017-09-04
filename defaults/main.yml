@@ -1,0 +1,7 @@
+---
+
+app_root: '/opt'
+tmp_root: '/tmp'
+
+blazegraph_version: 2.1.4
+blazegraph_working_directory: "{{ app_root }}/blazegraph"
